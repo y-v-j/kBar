@@ -1,0 +1,63 @@
+#!/usr/bin/python3
+"""Start an application from the bar, outside kBar's own service, so that
+restarting the bar never takes running applications down with it.
+
+  launch-app <n> [left|middle|right]   the n-th [[launcher]] in kbar.toml (from 0)
+  launch-app --desktop <id>            an installed application by .desktop file id
+  launch-app --kcm <module>            a System Settings page (e.g. kcm_pulseaudio)
+  launch-app -- <command> [args...]    any command
+"""
+import os
+import subprocess
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
+from common import load_config, notify  # noqa: E402
+
+
+def spawn(argv):
+    subprocess.Popen(argv, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                     stderr=subprocess.DEVNULL, start_new_session=True)
+
+
+def desktop(app_id):
+    # KIO starts the app in its own systemd scope, like Plasma's own launchers;
+    # kstart returns once the app is started
+    subprocess.run(["kstart", "--application", app_id.removesuffix(".desktop")], stdin=subprocess.DEVNULL,
+                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=30)
+
+
+def command(argv):
+    spawn(["systemd-run", "--user", "--scope", "--quiet", "--collect", "--slice=app.slice", "--", *argv])
+
+
+def launcher(index, button):
+    entries = load_config().get("launcher", [])
+    if not 0 <= index < len(entries):
+        notify("Launcher not found", f"kbar.toml has no launcher #{index}.", "dialog-warning")
+        return
+    entry = entries[index]
+    if button == "left":
+        if entry.get("desktop"):
+            return desktop(entry["desktop"])
+        cmd = entry.get("command")
+    else:
+        cmd = entry.get(button)
+    if cmd:
+        command(["sh", "-c", cmd])
+
+
+def main(args):
+    if len(args) >= 2 and args[0] == "--desktop":
+        desktop(args[1])
+    elif len(args) >= 2 and args[0] == "--kcm":
+        command(["systemsettings", args[1]])
+    elif len(args) >= 2 and args[0] == "--":
+        command(args[1:])
+    elif args and args[0].isdigit():
+        launcher(int(args[0]), args[1] if len(args) > 1 else "left")
+    else:
+        sys.exit(__doc__)
+
+
+main(sys.argv[1:])

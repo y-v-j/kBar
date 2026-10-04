@@ -1,0 +1,100 @@
+# kBar: settings you're likely to change.
+# Save the file and the bar updates by itself within a second or two.
+
+# ── Application launchers ────────────────────────────────────────────────────
+# One [[launcher]] block per icon, shown left to right after the desktops.
+#
+#   name     shown in error messages
+#   icon     a Nerd Font glyph; browse them at https://www.nerdfonts.com/cheat-sheet
+#   color    sky, lavender, rose, mint, butter, coral, fg, label, dim, or "#rrggbb"
+#   desktop  left click starts the app from its .desktop file id
+#            (find ids with: ls /usr/share/applications ~/.local/share/applications
+#             /var/lib/flatpak/exports/share/applications)
+#   command  ...or left click runs this shell command instead
+#   right    optional shell command for right click
+#   middle   optional shell command for middle click
+#
+# To add one, copy a block, change it and save. Order here is order on the bar.
+
+[[launcher]]
+name = "Konsole"
+icon = ""
+color = "lavender"
+desktop = "org.kde.konsole"
+right = "konsole --workdir ~/Projects"
+
+[[launcher]]
+name = "kitty"
+icon = "󰄛"
+color = "rose"
+desktop = "kitty"
+right = "kitty --directory ~/Projects"
+
+[[launcher]]
+name = "Dolphin"
+icon = "󱢴"
+color = "sky"
+desktop = "org.kde.dolphin"
+right = "dolphin ~/Downloads"
+
+[[launcher]]
+name = "System Settings"
+icon = "󰒓"
+color = "label"
+desktop = "systemsettings"
+right = "systemsettings kcm_kscreen"            # straight to Display & Monitor
+
+[[launcher]]
+name = "Firefox"
+icon = "󰈹"
+color = "coral"
+desktop = "org.mozilla.firefox"
+right = "flatpak run org.mozilla.firefox --private-window"
+
+[[launcher]]
+name = "Brave"
+icon = "󰞀"
+color = "butter"
+desktop = "com.brave.Browser"
+right = "flatpak run com.brave.Browser --incognito"
+
+[[launcher]]
+name = "Blanket"
+icon = "󰋋"
+color = "mint"
+desktop = "com.rafaelmardojai.Blanket"
+
+[[launcher]]
+name = "VS Code"
+icon = "󰨞"
+color = "sky"
+desktop = "code"
+right = "code --new-window"
+
+[[launcher]]
+name = "Sublime Text"
+icon = ""
+color = "butter"
+desktop = "com.sublimehq.SublimeText"
+right = "flatpak run com.sublimehq.SublimeText --new-window"
+
+[[launcher]]
+name = "Helix"
+icon = "󰚄"
+color = "lavender"
+command = "kitty --title Helix hx"
+right = "kitty --title Helix --directory ~/Projects hx ."
+
+# ── Weather ──────────────────────────────────────────────────────────────────
+[weather]
+location = ""            # a place ("Lisbon"), "lat,lon", or "" to locate by IP address
+units = "metric"         # "metric" (°C, km/h) or "imperial" (°F, mph)
+refresh_minutes = 15
+
+# ── Virtual desktops ─────────────────────────────────────────────────────────
+[desktops]
+labels = []              # e.g. ["󰆍", "󰈹"]; desktops without a label show their number
+
+# ── Application menu ─────────────────────────────────────────────────────────
+[menu]
+user_label = ""          # text in the menu's corner; "" shows user@hostname

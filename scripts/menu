@@ -1,0 +1,16 @@
+#!/usr/bin/python3
+"""Toggle the bar's application menu; start it first if it isn't running."""
+import os
+import socket
+import subprocess
+
+here = os.path.dirname(os.path.realpath(__file__))
+path = os.path.join(os.environ.get("XDG_RUNTIME_DIR") or "/tmp", "kbar-menu.sock")
+try:
+    with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
+        s.settimeout(1)
+        s.connect(path)
+        s.sendall(b"toggle\n")
+except OSError:
+    subprocess.Popen([os.path.join(here, "appmenu.py"), "--show"], start_new_session=True,
+                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

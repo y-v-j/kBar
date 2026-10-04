@@ -1,0 +1,25 @@
+#!/bin/sh
+# Wake a module script: "poke weather" toggles its detailed view,
+# "poke weather refresh" only redraws it (and re-reads kbar.toml).
+#
+# Only one detailed view is open at a time, so the bar never runs out of
+# room: opening one first folds away whichever other one is open.
+dir="${XDG_RUNTIME_DIR:-/tmp}"
+signal() {
+  pid=$(cat "${dir}/kbar-$1.pid" 2>/dev/null) && kill -s "$2" "$pid" 2>/dev/null
+}
+
+if [ "$2" = refresh ]; then
+  signal "$1" USR2
+  exit 0
+fi
+state="${dir}/kbar-expanded"
+open=$(cat "$state" 2>/dev/null)
+if [ "$open" = "$1" ]; then
+  rm -f "$state"                    # folding the open one away
+else
+  [ -n "$open" ] && signal "$open" USR1
+  echo "$1" > "$state"
+fi
+signal "$1" USR1
+exit 0

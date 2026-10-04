@@ -1,0 +1,10 @@
+#!/bin/sh
+# What kbar.service runs: build the launcher module from
+# kbar.toml, keep watching that file, start the application menu, then
+# run the bar (reloading it whenever config.ini is saved).
+cd "$(dirname "$0")/.." || exit 1
+rm -f "${XDG_RUNTIME_DIR:-/tmp}/kbar-expanded"   # every module starts folded
+scripts/launchers.py
+scripts/launchers.py --watch &
+scripts/appmenu.py &                # waits hidden, so Tux opens it instantly
+exec polybar --reload --config=config.ini kbar

@@ -1,0 +1,38 @@
+#!/bin/sh
+# KDE Plasma actions over D-Bus, using busctl (part of systemd), so neither
+# qdbus nor qdbus6 is needed.
+#
+#   kde overview | grid | show-desktop | night-light
+#   kde desktop-next | desktop-prev
+#   kde krunner | lock | leave | logout | reboot | shutdown
+#   kde brightness-up | brightness-down
+shortcut() {
+  busctl --user call org.kde.kglobalaccel /component/kwin org.kde.kglobalaccel.Component \
+    invokeShortcut s "$1"
+}
+prompt() {
+  busctl --user call org.kde.LogoutPrompt /LogoutPrompt org.kde.LogoutPrompt "$1"
+}
+brightness() {
+  # 5% steps; flag 1 hides KDE's on-screen indicator (the bar shows the level)
+  busctl --user -- call org.kde.ScreenBrightness /org/kde/ScreenBrightness \
+    org.kde.ScreenBrightness AdjustBrightnessRatio du "$1" 1
+}
+
+case "$1" in
+  overview)        shortcut "Overview" ;;
+  grid)            shortcut "Grid View" ;;
+  show-desktop)    shortcut "Show Desktop" ;;
+  night-light)     shortcut "Toggle Night Color" ;;
+  desktop-next)    shortcut "Switch to Next Desktop" ;;
+  desktop-prev)    shortcut "Switch to Previous Desktop" ;;
+  krunner)         busctl --user call org.kde.krunner /App org.kde.krunner.App toggleDisplay ;;
+  lock)            loginctl lock-session ;;
+  leave)           prompt promptAll ;;
+  logout)          prompt promptLogout ;;
+  reboot)          prompt promptReboot ;;
+  shutdown)        prompt promptShutDown ;;
+  brightness-up)   brightness 0.05 ;;
+  brightness-down) brightness -0.05 ;;
+  *) echo "usage: kde <action>  (see the top of this file)" >&2; exit 2 ;;
+esac >/dev/null
