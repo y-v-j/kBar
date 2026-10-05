@@ -1,0 +1,11 @@
+# ls colours: your system's defaults, with readable text on coloured backgrounds.
+# Installed as ~/.dir_colors on Fedora-style systems, where
+# /etc/profile.d/colorls.sh reads it. Delete it to go back to the defaults.
+INCLUDE /etc/DIR_COLORS
+
+# Dark text on the background colour instead of blue or white text, which is
+# hard to read on the soft Midnight Ink colours.
+OTHER_WRITABLE 30;42 # dir that is other-writable (o+w) and not sticky
+STICKY 30;44         # dir with the sticky bit set (+t) and not other-writable
+SETUID 30;41         # regular file that is setuid (u+s)
+MISSING 30;41        # the file a broken symlink points to

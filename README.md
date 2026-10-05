@@ -1,6 +1,6 @@
 # kBar
 
-A [polybar](https://github.com/polybar/polybar) for KDE Plasma. It runs across the top of the screen with an application menu, launchers, KDE virtual desktops and a full set of status widgets, and every part of it responds to the mouse. It shares its "Midnight Ink" look with [pySysMon](https://github.com/y-v-j/pySysMon), [pyQuotes](https://github.com/y-v-j/pyQuotes) and [pyReader](https://github.com/y-v-j/pyReader).
+A [polybar](https://github.com/polybar/polybar) for KDE Plasma. It runs across the top of the screen with an application menu, launchers, KDE virtual desktops and a full set of status widgets, and every part of it responds to the mouse. It shares its "Midnight Ink" look with [pySysMon](https://github.com/y-v-j/pySysMon), [pyQuotes](https://github.com/y-v-j/pyQuotes) and [pyReader](https://github.com/y-v-j/pyReader), and comes with [matching themes for Dolphin and Konsole](#matching-themes-for-dolphin-and-konsole).
 
 <p align="center">
   <img src="assets/kbar.png" alt="kBar across the full width of a 1920 px screen" width="100%">
@@ -53,6 +53,7 @@ Popups for the calendar, the forecast, and the battery with its power profiles:
 - **One detail at a time:** opening one widget's details folds away any other, so the bar never runs out of room.
 - **Light on resources:** each widget is a small Python script (standard library only) that redraws on D-Bus signals, PulseAudio events and inotify instead of polling where it can. The whole bar, polybar included, uses under 1% of one CPU core.
 - **Apps outlive the bar:** everything started from kBar runs in its own systemd scope, so restarting the bar never closes your windows.
+- **Matching Dolphin and Konsole:** optional Midnight Ink themes for the file manager and the terminal, applied to those two apps only.
 
 ## Requirements
 
@@ -144,6 +145,44 @@ user_label = ""          # text in the menu's corner; "" shows user@hostname
 
 [pySysMon](https://github.com/y-v-j/pySysMon), [pyQuotes](https://github.com/y-v-j/pyQuotes) and [pyReader](https://github.com/y-v-j/pyReader) read the space kBar reserves and keep below it, and they move back up if the bar stops.
 
+## Matching themes for Dolphin and Konsole
+
+`themes/` gives Dolphin and Konsole the same look as the bar and the widgets: the Midnight Ink colours, FantasqueSansM Nerd Font and 96% opacity. Only these two apps change; the rest of Plasma keeps its colour scheme, icons and accent. Menus, toolbars, shortcuts and behaviour stay as they were.
+
+<p align="center">
+  <img src="assets/dolphin.png" alt="Dolphin in Midnight Ink, with lavender folders and a Terminal button in the toolbar" width="560">
+</p>
+<p align="center">
+  <img src="assets/konsole.png" alt="Konsole readability check: every colour as normal, bold, bright, faint, underlined and reverse, plus ls, grep, diff and man page output" width="760">
+</p>
+
+```bash
+themes/install.sh                     # Dolphin, Konsole and readable ls colours
+themes/install.sh --terminal-button   # ...plus a Terminal on/off button in Dolphin's toolbar
+themes/install.sh --uninstall         # put back what was there before
+```
+
+Options `--no-dolphin`, `--no-konsole` and `--no-ls` skip a part. Restart Dolphin and Konsole afterwards.
+
+**Dolphin**
+
+- A KDE colour scheme (`MidnightInk.colors`): card-coloured title bar and toolbar, the background colour for the side panels, a slightly lighter file view, and lavender for selection, focus and hover. Selected files are lavender with dark text, like *today* in the calendar popup.
+- Lavender folders. Breeze tints folders with the Plasma accent, which a per-app scheme can't change, so `make-icon-theme.py` builds a small icon theme from your installed Breeze Dark with the lavender baked in, and Dolphin alone uses it.
+- FantasqueSansM Nerd Font for the icon, compact and details views. Menus, toolbar, panels and the status bar use Plasma's fonts (*System Settings > Text & Fonts*).
+- 96% opacity through a KWin window rule (`kbar-midnight-ink-dolphin`), like the widgets.
+- With `--terminal-button`, a **Terminal** button next to Split shows or hides Dolphin's terminal panel (F4 does the same). This needs a customised toolbar; if Dolphin's is still the default, the installer tells you how to add the button yourself.
+
+Folder previews (folders showing the pictures inside them) and the app icon in the title bar are drawn by other parts of Plasma, so they follow the Plasma accent colour.
+
+**Konsole**
+
+- A terminal colour scheme (`MidnightInk.colorscheme`) and a new default profile, *Midnight Ink*, copied from your current default profile so the shell, scrollback and keyboard and mouse settings stay as they are; only the colours, font (FantasqueSansM Nerd Font 12), cursor, line spacing and margin change. Konsole's tabs, menus and toolbar use the same Midnight Ink KDE colour scheme.
+- Built for readability. Normal colours are softened palette colours at 4.9:1 or more against the background; bold and bright text uses the full pastels at 9–14:1; faint text is 3.7:1 and "bright black" (comments, suggestions) 4.5:1. Selected text, `less` search hits and other highlights use reverse video: dark text on a light or coloured block, at 5–14:1. Underlined text keeps its text colour. Dark text on coloured backgrounds is about 4:1; light text on them is about 2.7:1.
+
+**ls colours**
+
+Some default `ls` colours put blue or white text on coloured backgrounds (world-writable and sticky folders, setuid files, missing link targets), which is hard to read on soft colours. On Fedora-style systems the installer adds a `~/.dir_colors` that keeps the system's colours but uses dark text for those four; elsewhere it prints a one-line `LS_COLORS` addition for your shell's rc file.
+
 ## How it works
 
 - polybar draws the bar; each widget is a script in `scripts/` that prints a line of polybar markup whenever its state changes. Clicks on a widget signal its script (`scripts/poke`) or run an action.
@@ -178,6 +217,12 @@ scripts/
   popup.py          Calendar, forecast and battery popups
   launch-app        Starts apps in their own systemd scope
   actions.py  kde  poke   Click actions
+themes/
+  install.sh              Midnight Ink for Dolphin and Konsole (and --uninstall)
+  MidnightInk.colors      KDE colour scheme: Dolphin, Konsole's window
+  MidnightInk.colorscheme Konsole terminal colours
+  make-icon-theme.py      Builds Breeze Dark with lavender folders for Dolphin
+  dir_colors              Readable ls colours (Fedora-style systems)
 assets/             Screenshots
 ```
 
@@ -194,6 +239,7 @@ This removes the bar, its scripts and the autostart entry. `~/.config/kbar/kbar.
 - [polybar](https://github.com/polybar/polybar), which draws the bar.
 - [Fantasque Sans Mono](https://github.com/belluzj/fantasque-sans) by Jany Belluz, patched by [Nerd Fonts](https://www.nerdfonts.com/).
 - Weather data by [Open-Meteo](https://open-meteo.com).
+- [Breeze icons](https://invent.kde.org/frameworks/breeze-icons) by KDE; the Dolphin icon theme is built from your installed copy.
 
 ## License
 
